@@ -15,119 +15,47 @@ import matplotlib.pyplot as plt
 
 df1=pd.read_excel('/content/NO1Sep22-1Sep23.xlsx')
 df1=df1.drop_duplicates()
-df1
-
 df2=pd.read_csv('/content/NO20_21.csv')
 df2=df2.drop_duplicates()
-df2
-
 df2[['Date','Value','Measurement']]=df2['Date;Value;Measurement'].str.split(';',expand=True)
-df2
-
 df2=df2.drop(columns='Date;Value;Measurement')
-df2
-
 df2[['dates','time']]=df2['Date'].str.split(' ',expand=True)
-df2
-
 df2=df2.drop(columns='Date')
-
-df2
 df2['Measurement'].value_counts()
-
 df2=df2.drop(columns='Measurement')
-
-df2
-
 df2[['hour','minutes']]=df2['time'].str.split(':',expand=True)
-
-df2
-
 df2['minutes'].value_counts()
-
 df2=df2.drop(columns='minutes')
 df2.drop(columns='time')
-
-df2
-
 df2[['DATE','MONTH','YEAR']]=df2['dates'].str.split('-',expand=True)
-
-df2
-
 df2=df2.drop(columns='dates')
-
 df2=df2.drop(columns='time')
-
-df1
-
 df1['date']=df1['dt'].dt.day
 df1['year']=df1['dt'].dt.year
 df1['month']=df1['dt'].dt.month
 df1['hour']=df1['dt'].dt.hour
-
-df1
-
 df1=df1.drop(columns='dt')
-
-df1
-
 df1['year'].value_counts()
-
-df2
-
 df2=df2.rename(columns={'DATE' : 'date'})
-
 df2=df2.rename(columns={'MONTH':'month'})
 df2=df2.rename(columns={'YEAR':'year'})
 df2=df2.rename(columns={'Value' : 'values'})
 df1['values']=df1['values']/1000
-
-df2
-
-df1
-
 df1['year'].value_counts()
-
 df2['year'].value_counts()
-
 df2.drop(df2.head(23).index,inplace=True)
 df2.drop(df2.tail(1).index,inplace=True)
 df2=df2.reset_index()
-
-df2
-
 df2['year'].value_counts()
-
 df2=df2.drop(columns='index')
-df2
-
-df1
-
 df1=df1.sort_values(by=['month','date','hour'])
-
-df1
-
 df1_2023=df1[:(8735-2904)]
 df1_2022=df1[(8735-2904):]
-
-df1_2023
-df1_2022
-
-df1_2023
-
-df2
-
 df1_2023=df1_2023.reset_index(drop=True)
-
-df1_2023
-
-df1_2023
-
 df2['year'] = df2['year'].astype(int)
 df2['month'] = df2['month'].astype(int)
 df2['date'] = df2['date'].astype(int)
 df2['hour'] = df2['hour'].astype(int)
-
 for i in range(5830):
     new_row_data = {
         'date': df1_2023.iloc[i]['date'],
@@ -137,54 +65,31 @@ for i in range(5830):
         'values': (float(df1_2023.iloc[i]['values']) + float(df2.iloc[i]['values'])) / 2
     }
     df1_2022.loc[2904 + i] = new_row_data.copy()
-
-df1_2022
-
 df1_2022['month'].value_counts()
-
 df1_2022['month'].value_counts()
-
 value_counts_by_month_date = df1_2022.groupby(['month', 'date']).size()
-
 value_counts_by_month_date_df = value_counts_by_month_date.reset_index(name='counts')
-
-value_counts_by_month_date_df
-
 value_counts_by_month_date_df['counts'].value_counts()
-
 # 30 OCTOBER DATA IS MISSING
 df1_2022=df1_2022.sort_values(by=['month','date','hour'])
 october_31_data = df1_2022[(df1_2022['month'] == 10) & (df1_2022['date'] == 31)]
-
 # Replace the date and month with October 30th
 october_31_data['date'] = 30
 october_31_data['month'] = 10
-
 # Append the modified data back to the DataFrame
 df1_2022 = df1_2022.append(october_31_data, ignore_index=True)
 
 df1_2022.sort_values(by=['month','date','hour'],inplace=True)
 df1_2022=df1_2022.reset_index(drop=True)
 
-df1_2022
 
 df1_2022=df1_2022.reset_index(drop=True)
-df1_2022
-
 for i in range (5830,8758):
   new_row_data={'date': df1_2022.iloc[i]['date'],'year': 2023,'month': df1_2022.iloc[i]['month'], 'hour':df1_2022.iloc[i]['hour'], 'values': (float(2*(df1_2022.iloc[i]['values']))-float(df2.iloc[i]['values']))}
   df1_2023.loc[i] = new_row_data
-
-df1_2023
-
 df_2023=df1_2023
 df_2022=df1_2022
 df_2021=df2
-
-df_2023
-
-
-
 # Filter data for August 30th
 august_30_data = df_2022[(df_2022['month'] == 8) & (df_2022['date'] == 30) & (df_2022['hour']==23)]
 
@@ -203,19 +108,10 @@ df_2022
 df_2022
 
 df_2022['month'].value_counts()
-
 df_2022['date'].value_counts()
 df_2022=df_2022.reset_index(drop=True)
-
 value_counts_by_month_date = df1_2022.groupby(['month', 'date']).size()
 value_counts_by_month_date_df=value_counts_by_month_date.reset_index()
-
-value_counts_by_month_date_df
-
-df_2021
-
-df_2022
-
 df_2020 = pd.DataFrame()
 for i in range(0, 8760):
     new_row = {'date': df_2021.loc[i]['date'],
