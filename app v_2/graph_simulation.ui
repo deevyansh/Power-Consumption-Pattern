@@ -6,12 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>643</width>
-    <height>470</height>
+    <width>731</width>
+    <height>526</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">#frame_13{border:0px}</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="styleSheet">
@@ -93,6 +96,12 @@
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
+      <property name="maximumSize">
+       <size>
+        <width>200</width>
+        <height>16777215</height>
+       </size>
+      </property>
       <property name="frameShape">
        <enum>QFrame::StyledPanel</enum>
       </property>
@@ -115,8 +124,14 @@
        <property name="bottomMargin">
         <number>0</number>
        </property>
-       <item>
+       <item alignment="Qt::AlignVCenter">
         <widget class="QFrame" name="frame_3">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="minimumSize">
           <size>
            <width>0</width>
@@ -134,7 +149,7 @@
            <number>0</number>
           </property>
           <property name="leftMargin">
-           <number>0</number>
+           <number>6</number>
           </property>
           <property name="topMargin">
            <number>6</number>
@@ -145,7 +160,7 @@
           <property name="bottomMargin">
            <number>6</number>
           </property>
-          <item alignment="Qt::AlignHCenter">
+          <item>
            <widget class="QLabel" name="label_14">
             <property name="minimumSize">
              <size>
@@ -163,7 +178,7 @@
              <string/>
             </property>
             <property name="pixmap">
-             <pixmap resource="resource.qrc">:/Icons_real/icons/pie-chart.png</pixmap>
+             <pixmap>:/Icons_real/icons/pie-chart.png</pixmap>
             </property>
             <property name="scaledContents">
              <bool>true</bool>
@@ -173,8 +188,20 @@
             </property>
            </widget>
           </item>
-          <item alignment="Qt::AlignHCenter">
+          <item alignment="Qt::AlignLeft">
            <widget class="QLabel" name="label">
+            <property name="minimumSize">
+             <size>
+              <width>150</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>300</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="font">
              <font>
               <pointsize>22</pointsize>
@@ -183,7 +210,7 @@
              </font>
             </property>
             <property name="text">
-             <string>QT Charts</string>
+             <string>                       QT Charts                  </string>
             </property>
             <property name="textFormat">
              <enum>Qt::RichText</enum>
@@ -199,7 +226,7 @@
        <item>
         <widget class="QFrame" name="frame_4">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -224,6 +251,34 @@
            <number>0</number>
           </property>
           <item>
+           <widget class="QLabel" name="PhotoLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>75</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>200</height>
+             </size>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="scaledContents">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="pushButton">
             <property name="minimumSize">
              <size>
@@ -235,7 +290,7 @@
              <string>Log Out</string>
             </property>
             <property name="icon">
-             <iconset resource="resource.qrc">
+             <iconset>
               <normaloff>:/Icons_real/icons/bar-chart-2.png</normaloff>:/Icons_real/icons/bar-chart-2.png</iconset>
             </property>
             <property name="iconSize">
@@ -258,7 +313,7 @@
              <string>Sign Up with another Id</string>
             </property>
             <property name="icon">
-             <iconset resource="resource.qrc">
+             <iconset>
               <normaloff>:/Icons_real/icons/thermometer.png</normaloff>:/Icons_real/icons/thermometer.png</iconset>
             </property>
             <property name="iconSize">
@@ -278,10 +333,10 @@
              </size>
             </property>
             <property name="text">
-             <string>Make a new Deal</string>
+             <string>Submit the Bid</string>
             </property>
             <property name="icon">
-             <iconset resource="resource.qrc">
+             <iconset>
               <normaloff>:/Icons_real/icons/octagon.png</normaloff>:/Icons_real/icons/octagon.png</iconset>
             </property>
             <property name="iconSize">
@@ -304,7 +359,7 @@
              <string>Account Info</string>
             </property>
             <property name="icon">
-             <iconset resource="resource.qrc">
+             <iconset>
               <normaloff>:/Icons_real/icons/bar-chart.png</normaloff>:/Icons_real/icons/bar-chart.png</iconset>
             </property>
             <property name="iconSize">
@@ -318,12 +373,24 @@
          </layout>
         </widget>
        </item>
-       <item>
+       <item alignment="Qt::AlignLeft|Qt::AlignTop">
         <widget class="QFrame" name="frame_5">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="minimumSize">
           <size>
-           <width>0</width>
+           <width>200</width>
            <height>0</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>16777215</height>
           </size>
          </property>
          <property name="frameShape">
@@ -334,7 +401,7 @@
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_3">
           <property name="leftMargin">
-           <number>0</number>
+           <number>6</number>
           </property>
           <property name="topMargin">
            <number>6</number>
@@ -369,7 +436,7 @@
              <string/>
             </property>
             <property name="pixmap">
-             <pixmap resource="resource.qrc">:/Icons_real/icons/smile.png</pixmap>
+             <pixmap>:/Icons_real/icons/smile.png</pixmap>
             </property>
             <property name="scaledContents">
              <bool>true</bool>
@@ -379,8 +446,26 @@
             </property>
            </widget>
           </item>
-          <item alignment="Qt::AlignHCenter">
+          <item alignment="Qt::AlignLeft">
            <widget class="QLabel" name="label_2">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>150</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>150</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>300</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="font">
              <font>
               <pointsize>20</pointsize>
@@ -389,7 +474,10 @@
              </font>
             </property>
             <property name="text">
-             <string>Support Me</string>
+             <string>   Support Me     </string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -453,7 +541,7 @@
              <string/>
             </property>
             <property name="pixmap">
-             <pixmap resource="resource.qrc">:/Icons/images/icons8-patreon-50.png</pixmap>
+             <pixmap>:/Icons/images/icons8-patreon-50.png</pixmap>
             </property>
             <property name="scaledContents">
              <bool>true</bool>
@@ -478,7 +566,7 @@
              <string/>
             </property>
             <property name="pixmap">
-             <pixmap resource="resource.qrc">:/Icons/images/icons8-youtube-studio-50.png</pixmap>
+             <pixmap>:/Icons/images/icons8-youtube-studio-50.png</pixmap>
             </property>
             <property name="scaledContents">
              <bool>true</bool>
@@ -503,7 +591,7 @@
              <string/>
             </property>
             <property name="pixmap">
-             <pixmap resource="resource.qrc">:/Icons/images/icons8-paypal-50.png</pixmap>
+             <pixmap>:/Icons/images/icons8-paypal-50.png</pixmap>
             </property>
             <property name="scaledContents">
              <bool>true</bool>
@@ -548,6 +636,12 @@
        </property>
        <item>
         <widget class="QFrame" name="frame_7">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="frameShape">
           <enum>QFrame::StyledPanel</enum>
          </property>
@@ -557,6 +651,12 @@
          <layout class="QHBoxLayout" name="horizontalLayout_4">
           <item>
            <widget class="QFrame" name="frame_10">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="frameShape">
              <enum>QFrame::StyledPanel</enum>
             </property>
@@ -582,7 +682,7 @@
                 <string/>
                </property>
                <property name="icon">
-                <iconset resource="resource.qrc">
+                <iconset>
                  <normaloff>:/Icons_real/icons/align-center.png</normaloff>:/Icons_real/icons/align-center.png</iconset>
                </property>
               </widget>
@@ -599,6 +699,12 @@
           </item>
           <item>
            <widget class="QFrame" name="frame_11">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="frameShape">
              <enum>QFrame::StyledPanel</enum>
             </property>
@@ -643,7 +749,7 @@
                 <string/>
                </property>
                <property name="icon">
-                <iconset resource="resource.qrc">
+                <iconset>
                  <normaloff>:/Icons_real/minus.png</normaloff>:/Icons_real/minus.png</iconset>
                </property>
               </widget>
@@ -689,7 +795,7 @@
                 <string/>
                </property>
                <property name="icon">
-                <iconset resource="resource.qrc">
+                <iconset>
                  <normaloff>:/Icons_real/icons/x.png</normaloff>:/Icons_real/icons/x.png</iconset>
                </property>
               </widget>
@@ -845,8 +951,6 @@
    </layout>
   </widget>
  </widget>
- <resources>
-  <include location="resource.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

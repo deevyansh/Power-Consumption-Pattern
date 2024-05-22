@@ -19,6 +19,10 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">#fr,#frame_4,#frame_5,#frame,#frame_2
+{border: 0px}</string>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout_5">
    <item alignment="Qt::AlignHCenter">
     <widget class="QFrame" name="frame_4">
