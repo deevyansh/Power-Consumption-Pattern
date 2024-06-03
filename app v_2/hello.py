@@ -1,9 +1,9 @@
 # Create a NOdata and VAdata
-MODE='VA'
+MODE='NO'
 
 import pandas as pd
-df1=pd.read_csv(f'Peak hour {MODE}_DK1.csv')
-df2=pd.read_csv(f'Peak hour {MODE}_DK2.csv')
+df1=pd.read_csv(f'data/Peak hour {MODE}_DK1.csv')
+df2=pd.read_csv(f'data/Peak hour {MODE}_DK2.csv')
 import pymysql
 db = pymysql.connect(host='localhost', user='root', passwd='c24466fb', database='SCHOOL')
 cursor = db.cursor()
