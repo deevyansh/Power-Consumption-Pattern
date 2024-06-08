@@ -155,7 +155,7 @@
            <number>6</number>
           </property>
           <property name="rightMargin">
-           <number>0</number>
+           <number>6</number>
           </property>
           <property name="bottomMargin">
            <number>6</number>
@@ -210,7 +210,7 @@
              </font>
             </property>
             <property name="text">
-             <string>                       QT Charts                  </string>
+             <string>Flexible Market</string>
             </property>
             <property name="textFormat">
              <enum>Qt::RichText</enum>
@@ -373,7 +373,7 @@
          </layout>
         </widget>
        </item>
-       <item alignment="Qt::AlignLeft|Qt::AlignTop">
+       <item>
         <widget class="QFrame" name="frame_5">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
@@ -474,7 +474,7 @@
              </font>
             </property>
             <property name="text">
-             <string>   Support Me     </string>
+             <string>Get Info</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -496,7 +496,7 @@
           <item row="1" column="1">
            <widget class="QLabel" name="label_4">
             <property name="text">
-             <string>Subscribe to Youtube</string>
+             <string>Tutorial Videos</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -506,7 +506,7 @@
           <item row="0" column="1">
            <widget class="QLabel" name="label_3">
             <property name="text">
-             <string>Patreon</string>
+             <string>Latest Updates</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -913,7 +913,7 @@
              <item>
               <widget class="QLabel" name="label_8">
                <property name="text">
-                <string>Copyright 0.0.0.</string>
+                <string>Copyright 162.198.1</string>
                </property>
               </widget>
              </item>

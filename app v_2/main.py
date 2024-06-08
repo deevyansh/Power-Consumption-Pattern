@@ -6,10 +6,10 @@ from PyQt6.QtGui import QPixmap,QIcon,QColor,QPalette
 from PyQt6.QtCore import QPropertyAnimation,QUrl
 from PyQt6.QtMultimedia import QMediaPlayer
 from PyQt6.QtMultimediaWidgets import QVideoWidget
-import pymysql
 from datetime import datetime
 from marketalgo import economic
 import os
+import sqlite3
 import pandas as pd
 
 def open1(p,button):
@@ -49,9 +49,9 @@ class MakeDecision(QWidget):
             return
         else:
             PD = float(self.Power.text())
-            db = pymysql.connect(host='localhost', user='root', passwd='c24466fb', database='SCHOOL')
+            db = sqlite3.connect('SCHOOL.db')
             cursor=db.cursor()
-            input_query1='SELECT * FROM storagedata WHERE FROMHour=(%s) AND Result=(%s) AND Date=(%s)'
+            input_query1='SELECT * FROM storagedata WHERE FROMHour=(?) AND Result=(?) AND Date=(?)'
             data1=(self.Hour.text(),'PD',self.Date1.date().toPyDate().strftime(format='%Y-%m-%d'))
             cursor.execute(input_query1,data1)
             results=cursor.fetchall()
@@ -92,24 +92,39 @@ class MakeDecision(QWidget):
             self.label_4.setText('Market Clear Algorithm successfully completed..')
             self.B=B
 
-
     def do2(self):
         self.table.clear()
         self.table.setRowCount(0)
         self.table.setColumnCount(0)
         self.label_4.setText('Market is Cleared')
-        db = pymysql.connect(host='localhost', user='root', passwd='c24466fb', database='SCHOOL')
-        cursor = db.cursor()
-        input_query1 = 'UPDATE storagedata SET Result=%s , Quantity_selected=%s WHERE id=%s'
-        for i in range(len(self.B)):
-            if(self.B[i]!=0):
-                data1 = ('YES',self.B[i],(self.results)[i][0])
-                cursor.execute(input_query1,data1)
-            else:
-                data1 = ('NO',self.B[i],(self.results)[i][0])
-                cursor.execute(input_query1,data1)
-        db.commit()
-        cursor.close()
+
+        try:
+            db = sqlite3.connect('SCHOOL.db')
+            cursor = db.cursor()
+
+            input_query1 = 'UPDATE storagedata SET Result=?, Quantity_selected=? WHERE id=?'
+
+            print('Number of elements in self.B:', len(self.B))
+
+            for i in range(len(self.B)):
+                print('Processing index', i)
+
+                if self.B[i] != 0:
+                    data1 = ('YES', self.B[i], self.results[i][0])
+                    print('Updating row with YES:', data1)
+                else:
+                    data1 = ('NO', self.B[i], self.results[i][0])
+                    print('Updating row with NO:', data1)
+
+                cursor.execute(input_query1, data1)
+
+            db.commit()
+            cursor.close()
+            db.close()
+            print("Database update successful")
+
+        except sqlite3.Error as e:
+            print("SQLite error:", e)
     def openin(self):
         self.p.insertWidget(3,AdminApp(self.p,self.button))
         self.p.setCurrentIndex(3)
@@ -129,7 +144,7 @@ class showDates(QWidget):
         MODE=username
         if(MODE=='ST' or MODE=='QF'):
             MODE='VA'
-        db = pymysql.connect(host='localhost', user='root', passwd='c24466fb', database='SCHOOL')
+        db=sqlite3.connect('SCHOOL.db')
         cursor=db.cursor()
         cursor.execute(f'SELECT * FROM {MODE}data ORDER BY Month ASC,Date ASC,Hour ASC')
         results=cursor.fetchall()
@@ -208,9 +223,9 @@ class LoginWindow(QWidget):
     def checkCredentials(self):
         username = self.lineedits['Username'].text()
         password = self.lineedits['Password'].text()
-        db = pymysql.connect(host='localhost', user='root', passwd='c24466fb', database='SCHOOL')
+        db=sqlite3.connect('SCHOOL.db')
         cursor = db.cursor()
-        query = "SELECT * FROM logindata WHERE Username=%s"
+        query = "SELECT * FROM logindata WHERE Username=?"
         cursor.execute(query, (username,))
         result = cursor.fetchone()
         if result:
@@ -247,7 +262,7 @@ class RegisterWindow(QWidget):
         self.Mainphoto.setPixmap(QPixmap('icons/Screenshot 2024-04-21 at 9.30.01 PM (1).png'))
 
     def fillinfo(self):
-        db = pymysql.connect(host='localhost', user='root', passwd='c24466fb', database='SCHOOL')
+        db=sqlite3.connect('SCHOOL.db')
         cursor = db.cursor()
         cursor.execute("""
                 CREATE TABLE IF NOT EXISTS logindata(
@@ -266,7 +281,7 @@ class RegisterWindow(QWidget):
             return
         cursor = db.cursor()
         data = (self.Usernamet.text(),self.Passwordt.text(),self.Emailt.text(),'1999-01-01')
-        insert_query = "INSERT INTO logindata (Username,Password,Email,minlimit) VALUES(%s,%s,%s,%s)"
+        insert_query = "INSERT INTO logindata (Username,Password,Email,minlimit) VALUES(?,?,?,?)"
         cursor.execute(insert_query, data)
         db.commit()
         cursor.close()
@@ -302,9 +317,9 @@ class ResultApp(QWidget):
         label = ['Market Participant ID','Price', 'Quantity', 'FromHour','ToHour', 'Date','Result','Quantity_Selected']
         self.table.setColumnCount(len(label))
         self.table.setHorizontalHeaderLabels(label)
-        db = pymysql.connect(host='localhost', user='root', password='c24466fb', database='SCHOOL')
+        db=sqlite3.connect('SCHOOL.db')
         cursor = db.cursor()
-        query = "SELECT Username,Price, Quantity,FromHour,ToHour,Date, Result,Quantity_selected FROM storagedata WHERE username=%s"
+        query = "SELECT Username,Price, Quantity,FromHour,ToHour,Date, Result,Quantity_selected FROM storagedata WHERE username=?"
         cursor.execute(query,self.username)
         results = cursor.fetchall()
         self.table.setRowCount(len(results))
@@ -356,7 +371,7 @@ class AdminApp(QWidget):
         label = ['Market Participant ID','Price', 'Quantity', 'FromHour','ToHour', 'Date','Result','Quantity_Selected']
         self.table.setColumnCount(len(label))
         self.table.setHorizontalHeaderLabels(label)
-        db = pymysql.connect(host='localhost', user='root', password='c24466fb', database='SCHOOL')
+        db=sqlite3.connect('SCHOOL.db')
         cursor = db.cursor()
         query = "SELECT Username,Price, Quantity,FromHour,ToHour,Date, Result,Quantity_selected FROM storagedata"
         cursor.execute(query)
@@ -423,10 +438,10 @@ class MainApp(QWidget):
         self.b=False
 
     def savedata(self,Price,Quantity,From,To,Date,Result,temp):
-        db = pymysql.connect(host='localhost', user='root', passwd='c24466fb', database='SCHOOL')
+        db=sqlite3.connect('SCHOOL.db')
         cursor = db.cursor()
         data = (self.username,Price, Quantity, From,To, Date,Result,temp)
-        insert_query = "INSERT INTO storagedata (Username,Price,Quantity,FromHour,ToHour,Date,Result,Quantity_selected) VALUES(%s,%s,%s,%s,%s,%s,%s,%s)"
+        insert_query = "INSERT INTO storagedata (Username,Price,Quantity,FromHour,ToHour,Date,Result,Quantity_selected) VALUES(?,?,?,?,?,?,?,?)"
         cursor.execute(insert_query, data)
         db.commit()
         cursor.close()
@@ -452,7 +467,7 @@ class MainApp(QWidget):
                 min_value=self.Date2.date().toPyDate().strftime('%Y-%m-%d')
             if (min_value > self.Date3.date().toPyDate().strftime('%Y-%m-%d')):
                 min_value =self.Date3.date().toPyDate().strftime('%Y-%m-%d')
-        db = pymysql.connect(host='localhost', user='root', passwd='c24466fb', database='SCHOOL')
+        db=sqlite3.connect('SCHOOL.db')
         cursor = db.cursor()
         input_query=f"SELECT minlimit from logindata WHERE Username='{self.username}'"
         cursor.execute(input_query)
@@ -466,7 +481,7 @@ class MainApp(QWidget):
             print('Error2')
             return False
         else:
-            input_query2 = "UPDATE logindata SET minlimit=%s WHERE Username=%s"
+            input_query2 = "UPDATE logindata SET minlimit=? WHERE Username=?"
             cursor.execute(input_query2, (str(min_value), self.username))
             db.commit()
             cursor.close()
@@ -474,9 +489,9 @@ class MainApp(QWidget):
 
     def goodcheck2(self,Date,Month,From,To,MODE):
         for i in range (int(From),int(To)):
-            db = pymysql.connect(host='localhost', user='root', passwd='c24466fb', database='SCHOOL')
+            db=sqlite3.connect('SCHOOL.db')
             cursor=db.cursor()
-            input_query1=(f'SELECT * FROM {MODE}data WHERE Date=%s AND Month=%s AND Hour=%s')
+            input_query1=(f'SELECT * FROM {MODE}data WHERE Date=? AND Month=? AND Hour=?')
             data=(Date,Month,i)
             cursor.execute(input_query1,data)
             result=cursor.fetchall()
@@ -507,7 +522,7 @@ class MainApp(QWidget):
         print(self.goodcheck())
         if(self.goodcheck() & self.check()):
             print('idhar kese??')
-            db = pymysql.connect(host='localhost', user='root', passwd='c24466fb', database='SCHOOL')
+            db = sqlite3.connect('SCHOOL.db')
             cursor = db.cursor()
             cursor.execute("""
                     CREATE TABLE IF NOT EXISTS storagedata(
