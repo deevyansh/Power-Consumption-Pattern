@@ -1,7 +1,7 @@
 import sys
 from PyQt6.QtWidgets import QApplication, QWidget, QMainWindow,QStackedWidget
 from PyQt6.uic import loadUi
-from PyQt6.QtWidgets import QLabel,QPushButton,QRadioButton,QVBoxLayout,QHBoxLayout,QGridLayout,QLineEdit,QSizePolicy,QLabel,QTableWidget,QTableWidgetItem
+from PyQt6.QtWidgets import QLabel,QPushButton,QRadioButton,QVBoxLayout,QHBoxLayout,QGridLayout,QLineEdit,QSizePolicy,QLabel,QTableWidget,QTableWidgetItem,QHeaderView
 from PyQt6.QtGui import QPixmap,QIcon,QColor,QPalette
 from PyQt6.QtCore import QPropertyAnimation,QUrl
 from PyQt6.QtMultimedia import QMediaPlayer
@@ -34,10 +34,12 @@ class MakeDecision(QWidget):
         loadUi("AllUI/MakeDec.ui", self)
         self.p=p
         self.button=button
+        self.button[2].hide()
+        self.button[3].show()
+        self.button[3].setText('SEE MORE BID')
+        self.button[3].clicked.connect(lambda: self.openin())
         self.MakeResult.clicked.connect(self.do1)
         self.pushButton_2.clicked.connect(self.do2)
-        self.button[3].setText('SEE MORE BID')
-        self.button[3].clicked.connect(lambda : self.openin())
     def check(self,list):
         sum=0
         for i in range (len(list)):
@@ -51,7 +53,7 @@ class MakeDecision(QWidget):
             PD = float(self.Power.text())
             db = sqlite3.connect('SCHOOL.db')
             cursor=db.cursor()
-            input_query1='SELECT * FROM storagedata WHERE FROMHour=(?) AND Result=(?) AND Date=(?)'
+            input_query1='SELECT * FROM storagedata WHERE FROMHour= ? AND Result= ? AND Date= ?'
             data1=(self.Hour.text(),'PD',self.Date1.date().toPyDate().strftime(format='%Y-%m-%d'))
             cursor.execute(input_query1,data1)
             results=cursor.fetchall()
@@ -75,22 +77,25 @@ class MakeDecision(QWidget):
                 self.label_4.setText('No enough Bids..')
                 return
             (A,B,C,D)=economic(PD,PD_min,PD_max,price_list)
-            print(A,B,C,D)
-            print('got the the answer')
+            for i in range (len(B)):
+                B[i]=round(float(B[i]),4)
             self.label_4.setStyleSheet('color : rgba(255,255,255)')
             self.table.setColumnCount(4)
             self.table.setRowCount(len(C))
             self.table.setHorizontalHeaderLabels(['Market Participant ID','Price','Quantity Bid','QuantityAccepted'])
+            self.table.setColumnWidth(0,150)
+            self.table.setColumnWidth(2,150)
+            self.table.setColumnWidth(1,150)
+            self.table.setColumnWidth(3,150)
             for i in range (len(C)):
                 self.table.setItem(i,0,QTableWidgetItem(str(results[C[i]][1])))
                 self.table.setItem(i, 1, QTableWidgetItem(str(results[C[i]][2])))
                 self.table.setItem(i, 2, QTableWidgetItem(str(results[C[i]][3])))
                 self.table.setItem(i, 3, QTableWidgetItem(str(B[C[i]])))
-            self.results=results
-            self.C=C
-            self.D=D
+
             self.label_4.setText('Market Clear Algorithm successfully completed..')
             self.B=B
+            self.list=username_list
 
     def do2(self):
         self.table.clear()
@@ -98,33 +103,24 @@ class MakeDecision(QWidget):
         self.table.setColumnCount(0)
         self.label_4.setText('Market is Cleared')
 
-        try:
-            db = sqlite3.connect('SCHOOL.db')
-            cursor = db.cursor()
+        db = sqlite3.connect('SCHOOL.db')
+        cursor = db.cursor()
+        for i in range(len(self.B)):
+            print('Processing index', i)
+            print(self.list[i])
+            input_query1 = 'UPDATE storagedata SET Result=?, Quantity_selected=? WHERE Username=?'
 
-            input_query1 = 'UPDATE storagedata SET Result=?, Quantity_selected=? WHERE id=?'
+            if self.B[i] != 0:
+                data1 = ("YES", self.B[i], self.list[i])
+                print('Updating row with YES:', data1)
+            else:
+                data1 = ("NO", self.B[i], self.list[i])
+                print('Updating row with NO:', data1)
+            cursor.execute(input_query1, data1)
 
-            print('Number of elements in self.B:', len(self.B))
+        db.commit()
+        cursor.close()
 
-            for i in range(len(self.B)):
-                print('Processing index', i)
-
-                if self.B[i] != 0:
-                    data1 = ('YES', self.B[i], self.results[i][0])
-                    print('Updating row with YES:', data1)
-                else:
-                    data1 = ('NO', self.B[i], self.results[i][0])
-                    print('Updating row with NO:', data1)
-
-                cursor.execute(input_query1, data1)
-
-            db.commit()
-            cursor.close()
-            db.close()
-            print("Database update successful")
-
-        except sqlite3.Error as e:
-            print("SQLite error:", e)
     def openin(self):
         self.p.insertWidget(3,AdminApp(self.p,self.button))
         self.p.setCurrentIndex(3)
@@ -150,8 +146,13 @@ class showDates(QWidget):
         results=cursor.fetchall()
         self.table.setRowCount(len(results))
         self.table.setColumnCount(4)
+        self.table.setColumnWidth(1,130)
+        self.table.setColumnWidth(2, 130)
+        self.table.setColumnWidth(3, 200)
+        self.table.setColumnWidth(0, 130)
         self.table.setHorizontalHeaderLabels(['month','date','hour','Quantity(KW)'])
         for i,(month,date,hour,covariance,value) in enumerate(results):
+            value=round(float(value),4)
             self.table.setItem(i,0,QTableWidgetItem(str(month)))
             self.table.setItem(i, 1, QTableWidgetItem(str(date)))
             self.table.setItem(i, 2, QTableWidgetItem(str(hour)))
@@ -248,12 +249,12 @@ class RegisterWindow(QWidget):
         super().__init__()
         self.button = button
         self.button[1].hide()
-        self.button[2].hide()
+        self.button[2].hide ()
         self.button[3].hide()
         self.button[0].show()
         self.button[4].hide()
         self.p=p
-        self.button[0].setText('Go to Login Page')
+        self.button[0].setText('Logout')
         self.button[0].clicked.connect(lambda: open1(self.p,self.button))
         loadUi('AllUI/Register1.ui', self)
         self.Status.setText('')
@@ -319,9 +320,11 @@ class ResultApp(QWidget):
         self.table.setHorizontalHeaderLabels(label)
         db=sqlite3.connect('SCHOOL.db')
         cursor = db.cursor()
-        query = "SELECT Username,Price, Quantity,FromHour,ToHour,Date, Result,Quantity_selected FROM storagedata WHERE username=?"
-        cursor.execute(query,self.username)
+        query = "SELECT Username,Price,Quantity,FromHour,ToHour,Date,Result,Quantity_selected FROM storagedata WHERE username=?"
+        data=(self.username,)
+        cursor.execute(query,data)
         results = cursor.fetchall()
+        print(results)
         self.table.setRowCount(len(results))
         p=0
         self.table.clearContents()
@@ -341,6 +344,7 @@ class ResultApp(QWidget):
                     self.table.setItem(p, 6,QTableWidgetItem(str(result)))
                     self.table.setItem(p, 7, QTableWidgetItem(str(quantity_s)))
                     p=p+1
+            print(p)
         self.table.setRowCount(p)
 class AdminApp(QWidget):
     def __init__(self,p,button):
@@ -469,8 +473,9 @@ class MainApp(QWidget):
                 min_value =self.Date3.date().toPyDate().strftime('%Y-%m-%d')
         db=sqlite3.connect('SCHOOL.db')
         cursor = db.cursor()
-        input_query=f"SELECT minlimit from logindata WHERE Username='{self.username}'"
-        cursor.execute(input_query)
+        input_query=f"SELECT minlimit from logindata WHERE Username=?"
+        data=(self.username,)
+        cursor.execute(input_query,data)
         results=cursor.fetchall()
         min_date = datetime.strptime(min_value, '%Y-%m-%d')
         result_date = datetime.strptime(results[0][0], '%Y-%m-%d')
