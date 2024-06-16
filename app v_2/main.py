@@ -208,18 +208,17 @@ class LoginWindow(QWidget):
         self.mediaplayer = QMediaPlayer()
         self.vedio = QVideoWidget()
         layout.addWidget(self.vedio, 0, 0, 8, 8)
-        self.mediaplayer.setSource(
-            QUrl.fromLocalFile('icons/Screen Recording 2024-05-19 at 11.52.05 AM (1).mp4'))
+        self.mediaplayer.setSource(QUrl.fromLocalFile('icons/Screen Recording 2024-05-19 at 11.52.05 AM (1).mp4'))
         self.mediaplayer.setVideoOutput(self.vedio)
         self.mediaplayer.play()
-        self.mediaplayer.positionChanged.connect(self.check_position)
-
-    def check_position(self, position):
-        total_duration = self.mediaplayer.duration()
-        if total_duration > 0:
-            target_position = 0.9 * total_duration  # 90% of the total duration
-            if position >= target_position:
-                self.mediaplayer.setPosition(0)
+    #     self.mediaplayer.positionChanged.connect(self.check_position)
+    #
+    # def check_position(self, position):
+    #     total_duration = self.mediaplayer.duration()
+    #     if total_duration > 0:
+    #         target_position = 0.8 * total_duration  # 80% of the total duration
+    #         if position >= target_position:
+    #             self.mediaplayer.setPosition(0)
 
     def checkCredentials(self):
         username = self.lineedits['Username'].text()
@@ -313,6 +312,9 @@ class ResultApp(QWidget):
         self.SelectedButton.clicked.connect(lambda: self.show_data())
         self.PendingButton.clicked.connect(lambda:self.show_data())
         self.NonSelectedButton.clicked.connect(lambda:self.show_data())
+        self.FromDate.dateChanged.connect(lambda:self.show_data())
+        self.ToDate.dateChanged.connect(lambda: self.show_data())
+
 
     def show_data(self):
         label = ['Market Participant ID','Price', 'Quantity', 'FromHour','ToHour', 'Date','Result','Quantity_Selected']
@@ -324,7 +326,6 @@ class ResultApp(QWidget):
         data=(self.username,)
         cursor.execute(query,data)
         results = cursor.fetchall()
-        print(results)
         self.table.setRowCount(len(results))
         p=0
         self.table.clearContents()
@@ -340,12 +341,14 @@ class ResultApp(QWidget):
                     self.table.setItem(p, 2, QTableWidgetItem(str(quantity)))
                     self.table.setItem(p, 3, QTableWidgetItem(str(fm)))
                     self.table.setItem(p, 4, QTableWidgetItem(str(to)))
+                    date=datetime.strptime(date, "%Y-%m-%d").strftime("%d-%m-%Y")
                     self.table.setItem(p, 5, QTableWidgetItem(str(date)))
                     self.table.setItem(p, 6,QTableWidgetItem(str(result)))
                     self.table.setItem(p, 7, QTableWidgetItem(str(quantity_s)))
                     p=p+1
-            print(p)
         self.table.setRowCount(p)
+        self.table.setColumnWidth(0, 150)
+        self.table.setColumnWidth(7, 150)
 class AdminApp(QWidget):
     def __init__(self,p,button):
         super().__init__()
@@ -367,6 +370,8 @@ class AdminApp(QWidget):
         self.SelectedButton.clicked.connect(lambda: self.show_data())
         self.PendingButton.clicked.connect(lambda:self.show_data())
         self.NonSelectedButton.clicked.connect(lambda:self.show_data())
+        self.FromDate.dateChanged.connect(lambda: self.show_data())
+        self.ToDate.dateChanged.connect(lambda: self.show_data())
     def openin(self):
         self.p.insertWidget(7,MakeDecision(self.p,self.button))
         self.p.setCurrentIndex(7)
@@ -395,12 +400,15 @@ class AdminApp(QWidget):
                     self.table.setItem(p, 2, QTableWidgetItem(str(quantity)))
                     self.table.setItem(p, 3, QTableWidgetItem(str(fm)))
                     self.table.setItem(p, 4, QTableWidgetItem(str(to)))
+                    date = datetime.strptime(date, "%Y-%m-%d").strftime("%d-%m-%Y")
                     self.table.setItem(p, 5, QTableWidgetItem(str(date)))
                     self.table.setItem(p, 6, QTableWidgetItem(str(result)))
                     self.table.setItem(p, 7, QTableWidgetItem(str(quantity_s)))
-
                     p=p+1
         self.table.setRowCount(p)
+        self.table.setRowCount(p)
+        self.table.setColumnWidth(0, 150)
+        self.table.setColumnWidth(7, 150)
 class MainApp(QWidget):
     def __init__(self,username,p,button):
         super().__init__()
@@ -454,16 +462,18 @@ class MainApp(QWidget):
     def simplecheck(self,From,To):
         if((From<To) & (From<=24) & (From>0) & (To<=24) & (To>0)):
             return False
-        print('Error1')
         return True
 
     def check(self):
         if(self.simplecheck(int(self.From1.text()),int(self.To1.text()))):
+            self.label_2.setText('Hours are not in correct order in 1st Bid')
             return False
         if (self.b):
             if( self.simplecheck(int(self.From2.text()),int(self.To2.text()))):
+                self.label_2.setText('Hours are not in correct order in 2nd Bid')
                 return False
             if ( self.simplecheck(int(self.From3.text()), int(self.To3.text()))):
+                self.label_2.setText('Hours are not in correct order in 3rd Bid')
                 return False
         min_value=str(self.Date1.date().toPyDate().strftime('%Y-%m-%d'))
         if(self.b):
@@ -479,11 +489,8 @@ class MainApp(QWidget):
         results=cursor.fetchall()
         min_date = datetime.strptime(min_value, '%Y-%m-%d')
         result_date = datetime.strptime(results[0][0], '%Y-%m-%d')
-        print(min_date)
-        print(result_date)
-        print('date')
         if(min_date<result_date):
-            print('Error2')
+            self.label_2.setText('Your Bids are in the past.Please check month, days ,hour you are bidding.')
             return False
         else:
             input_query2 = "UPDATE logindata SET minlimit=? WHERE Username=?"
@@ -512,21 +519,21 @@ class MainApp(QWidget):
         if(self.username=='NO' or self.username=='BG1' or self.username=='BG2'):
             MODE='NO'
         if(self.goodcheck2(self.Date1.date().toPyDate().day,self.Date1.date().toPyDate().month,self.From1.text(),self.To1.text(),MODE)==False):
+            self.label_2.setText('Your 1st Bid is not available.Please Check your hour,days,months')
             return False
         if(self.b):
             if (self.goodcheck2(self.Date2.date().toPyDate().day, self.Date2.date().toPyDate().month,self.From1.text(),self.To1.text(),MODE ) == False):
+                self.label_2.setText('Your 2nd Bid is not available.Please Check your hour,days,months')
                 return False
             if (self.goodcheck2(self.Date2.date().toPyDate().day, self.Date3.date().toPyDate().month, self.From1.text(),self.To1.text(),MODE) == False):
+                self.label_2.setText('Your 3rd Bid is not available.Please Check your hour,days,months')
                 return False
         return True
 
 
     def final(self):
-        print('Yes1')
-        print(self.check())
-        print(self.goodcheck())
-        if(self.goodcheck() & self.check()):
-            print('idhar kese??')
+        if(self.goodcheck()):
+          if(self.check()):
             db = sqlite3.connect('SCHOOL.db')
             cursor = db.cursor()
             cursor.execute("""
@@ -549,7 +556,7 @@ class MainApp(QWidget):
                 self.savedata(self.Price3.text(), self.Quantity3.text(),self.From3.text(),self.To3.text(),self.Date3.date().toPyDate().strftime('%Y-%m-%d'),'PD',0)
             self.label_2.setText('Bid Updated Successfully')
         else:
-            self.label_2.setText('Something gone wrong')
+            return
 class mainApp(QMainWindow):
     def __init__(self):
         super().__init__()
