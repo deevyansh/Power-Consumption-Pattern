@@ -2,7 +2,7 @@ import sys
 from PyQt6.QtWidgets import QApplication, QWidget, QMainWindow,QStackedWidget
 from PyQt6.uic import loadUi
 from PyQt6.QtWidgets import QLabel,QPushButton,QRadioButton,QVBoxLayout,QHBoxLayout,QGridLayout,QLineEdit,QSizePolicy,QLabel,QTableWidget,QTableWidgetItem,QHeaderView
-from PyQt6.QtGui import QPixmap,QIcon,QColor,QPalette
+from PyQt6.QtGui import QPixmap,QIcon,QColor,QPalette,QImage
 from PyQt6.QtCore import QPropertyAnimation,QUrl
 from PyQt6.QtMultimedia import QMediaPlayer
 from PyQt6.QtMultimediaWidgets import QVideoWidget
@@ -10,7 +10,13 @@ from datetime import datetime
 from marketalgo import economic
 import os
 import sqlite3
+import cv2
+from PyQt6.QtCore import QTimer
 import pandas as pd
+
+
+
+
 
 def open1(p,button):
     p.insertWidget(1, LoginWindow(p, button))
@@ -27,6 +33,8 @@ def open4(p,button,username):
 def open5(p,button,username):
     p.insertWidget(6,showDates(button,p,username))
     p.setCurrentIndex(6)
+
+
 
 class MakeDecision(QWidget):
     def __init__(self,p,button):
@@ -79,7 +87,7 @@ class MakeDecision(QWidget):
             (A,B,C,D)=economic(PD,PD_min,PD_max,price_list)
             for i in range (len(B)):
                 B[i]=round(float(B[i]),4)
-            self.label_4.setStyleSheet('color : rgba(255,255,255)')
+            self.LBL4.setStyleSheet('color : rgba(255,255,255)')
             self.table.setColumnCount(4)
             self.table.setRowCount(len(C))
             self.table.setHorizontalHeaderLabels(['Market Participant ID','Price','Quantity Bid','QuantityAccepted'])
@@ -93,7 +101,7 @@ class MakeDecision(QWidget):
                 self.table.setItem(i, 2, QTableWidgetItem(str(results[C[i]][3])))
                 self.table.setItem(i, 3, QTableWidgetItem(str(B[C[i]])))
 
-            self.label_4.setText('Market Clear Algorithm successfully completed..')
+            self.LBL4.setText('Market Clear Algorithm successfully completed..')
             self.B=B
             self.list=username_list
 
@@ -101,7 +109,7 @@ class MakeDecision(QWidget):
         self.table.clear()
         self.table.setRowCount(0)
         self.table.setColumnCount(0)
-        self.label_4.setText('Market is Cleared')
+        self.LBL4.setText('Market is Cleared')
 
         db = sqlite3.connect('SCHOOL.db')
         cursor = db.cursor()
@@ -145,18 +153,20 @@ class showDates(QWidget):
         cursor.execute(f'SELECT * FROM {MODE}data ORDER BY Month ASC,Date ASC,Hour ASC')
         results=cursor.fetchall()
         self.table.setRowCount(len(results))
-        self.table.setColumnCount(4)
-        self.table.setColumnWidth(1,130)
-        self.table.setColumnWidth(2, 130)
-        self.table.setColumnWidth(3, 200)
-        self.table.setColumnWidth(0, 130)
-        self.table.setHorizontalHeaderLabels(['month','date','hour','Quantity(KW)'])
+        self.table.setColumnCount(5)
+        self.table.setColumnWidth(1,100)
+        self.table.setColumnWidth(2, 100)
+        self.table.setColumnWidth(3, 100)
+        self.table.setColumnWidth(4, 180)
+        self.table.setColumnWidth(0, 100)
+        self.table.setHorizontalHeaderLabels(['Month','Date','Fromhour','Tohour','Quantity(KW)'])
         for i,(month,date,hour,covariance,value) in enumerate(results):
             value=round(float(value),4)
             self.table.setItem(i,0,QTableWidgetItem(str(month)))
             self.table.setItem(i, 1, QTableWidgetItem(str(date)))
             self.table.setItem(i, 2, QTableWidgetItem(str(hour)))
-            self.table.setItem(i, 3, QTableWidgetItem(str(value)))
+            self.table.setItem(i,3, QTableWidgetItem(str(hour+1)))
+            self.table.setItem(i, 4, QTableWidgetItem(str(value)))
         self.label.setStyleSheet('color: rgb(255,255,255)')
         layout.addWidget(self.label)
         layout.addWidget(self.table)
@@ -200,17 +210,42 @@ class LoginWindow(QWidget):
         self.status.setStyleSheet('color :rgb(255,255,255)')
         layout.addWidget(self.status, 14, 0, 1, 4)
 
+
+
+        self.video_label = QLabel()
+        layout.addWidget(self.video_label, 0, 0, 8, 8)
         self.button.clicked.connect(self.checkCredentials)
         self.button2 = QPushButton('Not a member? Sign Up')
         layout.addWidget(self.button2, 13, 2, 1, 4)
         self.button2.clicked.connect(lambda: open2(self.p,self.button1))
+        # self.video_path = 'icons/Screen Recording 2024-05-19 at 11.52.05 AM (1).mp4'
+        # self.cap = cv2.VideoCapture(self.video_path)
+        # self.timer = QTimer()
+        # self.timer.timeout.connect(self.update_frame)
+        # self.timer.start(15)
+        # self.desired_width = 650
+        # self.desired_height = 400
 
-        self.mediaplayer = QMediaPlayer()
-        self.vedio = QVideoWidget()
-        layout.addWidget(self.vedio, 0, 0, 8, 8)
-        self.mediaplayer.setSource(QUrl.fromLocalFile('icons/Screen Recording 2024-05-19 at 11.52.05 AM (1).mp4'))
-        self.mediaplayer.setVideoOutput(self.vedio)
-        self.mediaplayer.play()
+    def update_frame(self):
+        ret, frame = self.cap.read()
+        if ret:
+                # Convert the frame to QImage
+            frame = cv2.resize(frame, (self.desired_width, self.desired_height))
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            h, w, ch = frame.shape
+            bytes_per_line = ch * w
+            q_image = QImage(frame.data, w, h, bytes_per_line, QImage.Format.Format_RGB888)
+            self.video_label.setPixmap(QPixmap.fromImage(q_image))
+        else:
+            self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+
+
+        # self.mediaplayer = QMediaPlayer()
+        # self.vedio = QVideoWidget()
+        # layout.addWidget(self.vedio, 0, 0, 8, 8)
+        # self.mediaplayer.setSource(QUrl.fromLocalFile('icons/Screen Recording 2024-05-19 at 11.52.05 AM (1).mp4'))
+        # self.mediaplayer.setVideoOutput(self.vedio)
+        # self.mediaplayer.play()
     #     self.mediaplayer.positionChanged.connect(self.check_position)
     #
     # def check_position(self, position):
@@ -253,7 +288,7 @@ class RegisterWindow(QWidget):
         self.button[0].show()
         self.button[4].hide()
         self.p=p
-        self.button[0].setText('Logout')
+        self.button[0].setText('Login Here')
         self.button[0].clicked.connect(lambda: open1(self.p,self.button))
         loadUi('AllUI/Register1.ui', self)
         self.Status.setText('')
@@ -354,6 +389,7 @@ class AdminApp(QWidget):
         super().__init__()
         self.button=button
         self.button[0].show()
+        self.button[0].setText('Logout')
         self.button[1].show()
         self.button[2].hide()
         self.button[3].setText('Clear the Market')
@@ -415,6 +451,7 @@ class MainApp(QWidget):
         self.button=button
         self.p=p
         self.button[0].show()
+        self.button[0].setText('Logout')
         self.button[1].show()
         self.button[2].show()
         self.button[2].setText('Show my results')
@@ -557,13 +594,13 @@ class MainApp(QWidget):
             self.label_2.setText('Bid Updated Successfully')
         else:
             return
-class mainApp(QMainWindow):
+class GeneralApp(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle('Main Window')
         self.resize(400, 400)
         print(os. getcwd() )
-        loadUi('AllUI/graph_simulation.ui',self)
+        loadUi('AllUI/generalApp.ui',self)
         self.label_16.setPixmap(QPixmap('images/icons8-patreon-50.png'))
         self.PhotoLabel.setPixmap(QPixmap('icons/downlaod.jpg'))
         self.label_17.setPixmap(QPixmap('images/icons8-youtube-studio-50.png'))
@@ -621,7 +658,8 @@ class mainApp(QMainWindow):
             self.frame.setFixedWidth(200)
 
 if __name__=='__main__':
+    print(os.getcwd())
     app = QApplication(sys.argv)
-    widget = mainApp()
+    widget = GeneralApp()
     widget.show()
     app.exec()
