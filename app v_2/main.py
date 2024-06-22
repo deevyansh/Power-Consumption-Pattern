@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import QApplication, QWidget, QMainWindow,QStackedWidget
 from PyQt6.uic import loadUi
 from PyQt6.QtWidgets import QLabel,QPushButton,QRadioButton,QVBoxLayout,QHBoxLayout,QGridLayout,QLineEdit,QSizePolicy,QLabel,QTableWidget,QTableWidgetItem,QHeaderView
 from PyQt6.QtGui import QPixmap,QIcon,QColor,QPalette,QImage
-from PyQt6.QtCore import QPropertyAnimation,QUrl
+from PyQt6.QtCore import QPropertyAnimation,QUrl,Qt
 from PyQt6.QtMultimedia import QMediaPlayer
 from PyQt6.QtMultimediaWidgets import QVideoWidget
 from datetime import datetime
@@ -135,9 +135,6 @@ def open7():
     a.setCurrentIndex(7)
     makedecision.start()
 
-
-
-
 class MakeDecision(QWidget):
     def __init__(self):
         super().__init__()
@@ -154,6 +151,10 @@ class MakeDecision(QWidget):
         self.Date1.setDate(datetime.today())
         self.Power.setText('')
         self.Hour.setText('')
+        self.label.setStyleSheet('color: rgb(0,0,0)')
+        self.label_2.setStyleSheet('color: rgb(0,0,0)')
+        self.LBL3.setStyleSheet('color: rgb(0,0,0)')
+        self.LBL4.setStyleSheet('color: rgb(0,0,0)')
 
     def check(self,list):
         sum=0
@@ -166,14 +167,14 @@ class MakeDecision(QWidget):
             return
         else:
             PD = float(self.Power.text())
-            db = sqlite3.connect('SCHOOL.db')
+            db = sqlite3.connect(os.path.join(path,'SCHOOL.db'))
             cursor=db.cursor()
             input_query1='SELECT * FROM storagedata WHERE FROMHour= ? AND Result= ? AND Date= ?'
             data1=(self.Hour.text(),'PD',self.Date1.date().toPyDate().strftime(format='%Y-%m-%d'))
             cursor.execute(input_query1,data1)
             results=cursor.fetchall()
             if(len(results)==0):
-                self.label_4.setText('No Remaining Bids for this date')
+                self.LBL4.setText('No Remaining Bids for this date')
                 return
             print(results)
             username_list=['' for _ in range (0,len(results))]
@@ -189,7 +190,7 @@ class MakeDecision(QWidget):
                 self.table.clear()
                 self.table.setRowCount(0)
                 self.table.setColumnCount(0)
-                self.label_4.setText('No enough Bids..')
+                self.LBL4.setText('No enough Bids..')
                 return
             (A,B,C,D)=economic(PD,PD_min,PD_max,price_list)
             for i in range (len(B)):
@@ -211,13 +212,18 @@ class MakeDecision(QWidget):
             self.LBL4.setText('Market Clear Algorithm successfully completed..')
             self.B=B
             self.list=username_list
+            for i in range(self.table.rowCount()):
+                for j in range(self.table.columnCount()):
+                    item = self.table.item(i, j);
+                    if item:
+                        item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
     def do2(self):
         self.table.clear()
         self.table.setRowCount(0)
         self.table.setColumnCount(0)
         self.LBL4.setText('Market is Cleared')
 
-        db = sqlite3.connect('SCHOOL.db')
+        db = sqlite3.connect(os.path.join(path,'SCHOOL.db'))
         cursor = db.cursor()
         for i in range(len(self.B)):
             print('Processing index', i)
@@ -245,7 +251,7 @@ class showDates(QWidget):
         self.b=QPushButton('CHECK THE TABLE NOW')
         self.label=QLabel('All the available dates you can bid for')
 
-        self.label.setStyleSheet('color: rgb(255,255,255)')
+        self.label.setStyleSheet('color: rgb(0,0,0)')
         layout.addWidget(self.label)
         layout.addWidget(self.table)
         layout.addWidget(self.b)
@@ -256,13 +262,14 @@ class showDates(QWidget):
         self.table.clear()
         self.b.show()
 
+
     def do1(self):
         self.b.hide()
         global username
         MODE = username
         if (MODE == 'ST' or MODE == 'QF' or MODE == ''):
             MODE = 'VA'
-        db = sqlite3.connect('SCHOOL.db')
+        db = sqlite3.connect(os.path.join(path,'SCHOOL.db'))
         cursor = db.cursor()
         cursor.execute(f'SELECT * FROM {MODE}data ORDER BY Month ASC,Date ASC,Hour ASC')
         results = cursor.fetchall()
@@ -281,6 +288,11 @@ class showDates(QWidget):
             self.table.setItem(i, 2, QTableWidgetItem(str(hour)))
             self.table.setItem(i, 3, QTableWidgetItem(str(hour + 1)))
             self.table.setItem(i, 4, QTableWidgetItem(str(value)))
+        for i in range (self.table.rowCount()):
+            for j in range (self.table.columnCount()):
+                item = self.table.item(i,j);
+                if item:
+                    item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
 class LoginWindow(QWidget):
     def __init__(self):
         super().__init__()
@@ -316,6 +328,7 @@ class LoginWindow(QWidget):
 
         self.video_label = QLabel()
         layout.addWidget(self.video_label, 0, 0, 8, 8)
+        self.video_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.button.clicked.connect(self.checkCredentials)
         self.button2 = QPushButton('Not a member? Sign Up')
         layout.addWidget(self.button2, 13, 2, 1, 4)
@@ -332,6 +345,9 @@ class LoginWindow(QWidget):
         self.status.setText('')
         self.lineedits['Username'].setText('')
         self.lineedits['Password'].setText('')
+        self.labels['Username'].setStyleSheet('color: rgb(0,0,0)')
+        self.labels['Password'].setStyleSheet('color: rgb(0,0,0)')
+        self.status.setStyleSheet('color: rgb(0,0,0)')
 
     def update_frame(self):
         ret, frame = self.cap.read()
@@ -360,7 +376,7 @@ class LoginWindow(QWidget):
         username = self.lineedits['Username'].text()
         print("USERNAME",username)
         password = self.lineedits['Password'].text()
-        db=sqlite3.connect('SCHOOL.db')
+        db=sqlite3.connect(os.path.join(path,'SCHOOL.db'))
         cursor = db.cursor()
         query = "SELECT * FROM logindata WHERE Username=?"
         cursor.execute(query, (username,))
@@ -390,6 +406,11 @@ class RegisterWindow(QWidget):
         self.Mainphoto.setPixmap(QPixmap(os.path.join(path,'icons/Screenshot 2024-04-21 at 9.30.01 PM (1).png')))
 
     def start(self):
+        self.Username.setStyleSheet('color: rgb(0,0,0)')
+        self.Email.setStyleSheet('color: rgb(0,0,0)')
+        self.Password.setStyleSheet('color: rgb(0,0,0)')
+        self.Status.setStyleSheet('color: rgb(0,0,0)')
+        self.ConfirmPassword.setStyleSheet('color: rgb(0,0,0)')
         self.Status.setText('')
 
     def fillinfo(self):
@@ -436,6 +457,9 @@ class ResultApp(QWidget):
         self.table.setRowCount(0)
         self.table.setColumnCount(0)
         self.table.clear()
+        self.lbl2.setStyleSheet('color: rgb(0,0,0)')
+        self.lbl4.setStyleSheet('color: rgb(0,0,0)')
+        self.lbl5.setStyleSheet('color: rgb(0,0,0)')
 
 
     def show_data(self):
@@ -472,6 +496,11 @@ class ResultApp(QWidget):
         self.table.setRowCount(p)
         self.table.setColumnWidth(0, 150)
         self.table.setColumnWidth(7, 150)
+        for i in range (self.table.rowCount()):
+            for j in range (self.table.columnCount()):
+                item = self.table.item(i,j);
+                if item:
+                    item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
 class AdminApp(QWidget):
     def __init__(self):
         super().__init__()
@@ -491,6 +520,11 @@ class AdminApp(QWidget):
         self.table.setRowCount(0)
         self.table.setColumnCount(0)
         self.table.clear()
+        self.lbl2.setStyleSheet('color: rgb(0,0,0)')
+        self.lbl4.setStyleSheet('color: rgb(0,0,0)')
+        self.lbl5.setStyleSheet('color: rgb(0,0,0)')
+
+
 
     def show_data(self):
         label = ['Market Participant ID','Price', 'Quantity', 'FromHour','ToHour', 'Date','Result','Quantity_Selected']
@@ -525,6 +559,11 @@ class AdminApp(QWidget):
         self.table.setRowCount(p)
         self.table.setColumnWidth(0, 150)
         self.table.setColumnWidth(7, 150)
+        for i in range (self.table.rowCount()):
+            for j in range (self.table.columnCount()):
+                item = self.table.item(i,j);
+                if item:
+                    item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
 class MainApp(QWidget):
     def __init__(self):
         super().__init__()
@@ -532,7 +571,7 @@ class MainApp(QWidget):
         global username
         self.setWindowTitle(f'Main App{username}')
         layout=QVBoxLayout()
-        loadUi(os.path.join(path,'AllUI/MainApp.ui'), self)
+        loadUi(os.path.join(path,os.path.join(path,'AllUI/MainApp.ui')), self)
         self.NoButton.clicked.connect(self.no)
         self.YesButton.clicked.connect(self.yes)
         self.FinalButton.clicked.connect(self.final)
@@ -560,6 +599,15 @@ class MainApp(QWidget):
         self.Date1.setDate(datetime.today())
         self.Date2.setDate(datetime.today())
         self.Date3.setDate(datetime.today())
+        self.Welcome.setStyleSheet('color: rgb(0,0,0)')
+        self.Text.setStyleSheet('color: rgb(0,0,0)')
+        self.LBL3.setStyleSheet('color: rgb(0,0,0)')
+        self.LBL4.setStyleSheet('color: rgb(0,0,0)')
+        self.LBL5.setStyleSheet('color: rgb(0,0,0)')
+        self.LBL6.setStyleSheet('color: rgb(0,0,0)')
+        self.LBL7.setStyleSheet('color: rgb(0,0,0)')
+        self.label_2.setStyleSheet('color: rgb(0,0,0)')
+
         self.b=False
         return
 
@@ -611,7 +659,7 @@ class MainApp(QWidget):
                 min_value=self.Date2.date().toPyDate().strftime('%Y-%m-%d')
             if (min_value > self.Date3.date().toPyDate().strftime('%Y-%m-%d')):
                 min_value =self.Date3.date().toPyDate().strftime('%Y-%m-%d')
-        db=sqlite3.connect('SCHOOL.db')
+        db=sqlite3.connect(os.path.join(path,'SCHOOL.db'))
         cursor = db.cursor()
         input_query=f"SELECT minlimit from logindata WHERE Username=?"
         data=(username,)
@@ -631,7 +679,7 @@ class MainApp(QWidget):
 
     def goodcheck2(self,Date,Month,From,To,MODE):
         for i in range (int(From),int(To)):
-            db=sqlite3.connect(os.path.join('SCHOOL.db'))
+            db=sqlite3.connect(os.path.join(path,'SCHOOL.db'))
             cursor=db.cursor()
             input_query1=(f'SELECT * FROM {MODE}data WHERE Date=? AND Month=? AND Hour=?')
             data=(Date,Month,i)
@@ -664,7 +712,7 @@ class MainApp(QWidget):
     def final(self):
         if(self.goodcheck()):
           if(self.check()):
-            db = sqlite3.connect('SCHOOL.db')
+            db = sqlite3.connect(os.path.join(path,'SCHOOL.db'))
             cursor = db.cursor()
             cursor.execute("""
                     CREATE TABLE IF NOT EXISTS storagedata(
@@ -693,21 +741,21 @@ class GeneralApp(QMainWindow):
         self.setWindowTitle('Main Window')
         self.resize(400, 400)
         print(os. getcwd() )
-        loadUi('AllUI/generalApp.ui',self)
-        self.label_16.setPixmap(QPixmap('images/icons8-patreon-50.png'))
-        self.PhotoLabel.setPixmap(QPixmap('icons/downlaod.jpg'))
-        self.label_17.setPixmap(QPixmap('images/icons8-youtube-studio-50.png'))
-        self.label_18.setPixmap(QPixmap('images/icons8-paypal-50.png'))
-        self.pushButton_2.setIcon(QIcon('icons/thermometer.png'))
-        self.pushButton_5.setIcon(QIcon('icons/octagon.png'))
-        self.pushButton_9.setIcon(QIcon('icons/x.png'))
-        self.pushButton_8.setIcon(QIcon('icons/maximize.png'))
-        self.pushButton_7.setIcon(QIcon('icons/minimize.png'))
-        self.pushButton_6.setIcon(QIcon('icons/align-center.png'))
-        self.label_14.setPixmap(QPixmap('icons/pie-chart.png'))
-        self.label_15.setPixmap(QPixmap('icons/smile.png'))
-        self.pushButton.setIcon(QIcon('icons/logout.png'))
-        self.pushButton_4.setIcon(QIcon('icons/Acc.png'))
+        loadUi(os.path.join(path,'AllUI/generalApp.ui'),self)
+        self.label_16.setPixmap(QPixmap(os.path.join(path,'images/icons8-patreon-50.png')))
+        self.PhotoLabel.setPixmap(QPixmap(os.path.join(path,'icons/downlaod.jpg')))
+        self.label_17.setPixmap(QPixmap(os.path.join(path,'images/icons8-youtube-studio-50.png')))
+        self.label_18.setPixmap(QPixmap(os.path.join(path,'images/icons8-paypal-50.png')))
+        self.pushButton_2.setIcon(QIcon(os.path.join(path,'icons/thermometer.png')))
+        self.pushButton_5.setIcon(QIcon(os.path.join(path,'icons/octagon.png')))
+        self.pushButton_9.setIcon(QIcon(os.path.join(path,'icons/x.png')))
+        self.pushButton_8.setIcon(QIcon(os.path.join(path,'icons/maximize.png')))
+        self.pushButton_7.setIcon(QIcon(os.path.join(path,'icons/minimize.png')))
+        self.pushButton_6.setIcon(QIcon(os.path.join(path,'icons/align-center.png')))
+        self.label_14.setPixmap(QPixmap(os.path.join(path,'icons/pie-chart.png')))
+        self.label_15.setPixmap(QPixmap(os.path.join(path,'icons/smile.png')))
+        self.pushButton.setIcon(QIcon(os.path.join(path,'icons/logout.png')))
+        self.pushButton_4.setIcon(QIcon(os.path.join(path,'icons/Acc.png')))
         layout=QVBoxLayout()
         self.a.setLayout(layout)
 
